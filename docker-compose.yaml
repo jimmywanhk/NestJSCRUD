@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  app:
+    volumes:
+      - ${APP_BACKEND}:/usr/src/app
+      - /usr/src/app/node_modules
+    ports:
+      - 4500:3000
+
+    build:
+      context: ./
+    command: sh -c "yarn install && yarn start:dev"
+
+  db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: 'postgres'
+      POSTGRES_DB: task-management # The PostgreSQL default database (automatically created at first launch)
