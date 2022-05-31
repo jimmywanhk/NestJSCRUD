@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { TaskStatus } from './task-status.enum';
 //import { v4 as uuid } from 'uuid';
 import { CreateTaskDto } from './dto/create-task.dto';
@@ -6,14 +6,20 @@ import { takeCoverage } from 'v8';
 import { stat } from 'fs';
 import { GetTasksFilterDto } from './dto/get-tasks-filter.dto';
 import { TasksRepository } from './tasks.repository';
-import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class TasksService {
-  constructor(
-    @InjectRepository(TasksRepository)
-    private tasksRepository: TasksRepository) {}
+  constructor(private readonly tasksRepository: TasksRepository) {}
 
+  async createTask() {
+    const task = {
+      status: TaskStatus.DONE,
+      description: 'The bug is fixed!!',
+      title: 'Hello jimmy',
+    };
+    return await this.tasksRepository.createTask(task);
+    // return await this.tasksRepository.count();
+  }
   //private tasks: Task[] = [];
   // getAllTasks(): Task[] {
   //   return this.tasks;
