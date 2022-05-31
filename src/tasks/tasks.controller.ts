@@ -22,7 +22,7 @@ export class TasksController {
   constructor(private tasksService: TasksService) {}
 
   @Get()
-  getTask(): Promise<Task> {
+  createTask(): Promise<Task> {
     return this.tasksService.createTask();
   }
 
