@@ -1,9 +1,18 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { instanceToPlain, plainToClass, plainToInstance } from 'class-transformer';
+import {
+  instanceToPlain,
+  plainToClass,
+  plainToInstance,
+} from 'class-transformer';
 import { randomBytes } from 'crypto';
-import { GetUser } from 'src/auth/get-user.decorator';
-import { User } from 'src/auth/user.entity';
+import { GetUser } from '../auth/get-user.decorator';
+import { User } from '../auth/user.entity';
 import { Repository } from 'typeorm';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { GetTasksFilterDto } from './dto/get-tasks-filter.dto';
@@ -12,9 +21,10 @@ import { Task } from './task.entity';
 
 @Injectable()
 export class TasksRepository {
+  private logger = new Logger('TasksRepository', { timestamp: true });
   constructor(
     @InjectRepository(Task) private readonly repository: Repository<Task>,
-  ) { }
+  ) {}
 
   async getTasks(filterDto: GetTasksFilterDto, user: User): Promise<Task[]> {
     const { status, search } = filterDto;
@@ -23,7 +33,7 @@ export class TasksRepository {
     query.where({ user });
 
     if (status) {
-      query.andWhere('task.status = :status', { status });
+      query.andWhere('task.statusABC = :status', { status });
     }
 
     if (search) {
@@ -33,8 +43,18 @@ export class TasksRepository {
       );
     }
 
-    const tasks = await query.getMany();
-    return tasks;
+    try {
+      const tasks = await query.getMany();
+      return tasks;
+    } catch (error) {
+      this.logger.error(
+        `Failed to get tasks for user "${
+          user.username
+        }". Filters: ${JSON.stringify(filterDto)}`,
+        error.stack,
+      );
+      throw new InternalServerErrorException();
+    }
   }
 
   async getTaskById(id: string, user: User): Promise<Task> {
@@ -49,9 +69,9 @@ export class TasksRepository {
       description: description,
       status: TaskStatus.OPEN,
       user,
-    })
+    });
 
-    return await this.repository.save(task)
+    return await this.repository.save(task);
   }
   async deleteTask(id: string, user: User): Promise<void> {
     const result = await this.repository.delete({ id, user });
