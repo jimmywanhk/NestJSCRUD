@@ -24,8 +24,8 @@
 
 ## Description
 
-https://www.udemy.com/course/nestjs-zero-to-hero/
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- https://www.udemy.com/course/nestjs-zero-to-hero/
+- [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
 ## Installation
 
